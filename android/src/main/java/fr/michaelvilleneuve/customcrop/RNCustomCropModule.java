@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
+import android.os.Build;
+import android.os.Environment;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -44,6 +47,7 @@ import java.util.List;
 public class RNCustomCropModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
+  private static final String TAG = "JavaImageCropper";
 
   public RNCustomCropModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -63,7 +67,17 @@ public class RNCustomCropModule extends ReactContextBaseJavaModule {
     Point bl = new Point(points.getMap("bottomLeft").getDouble("x"), points.getMap("bottomLeft").getDouble("y"));
     Point br = new Point(points.getMap("bottomRight").getDouble("x"), points.getMap("bottomRight").getDouble("y"));
 
-    Mat src = Imgcodecs.imread(imageUri.replace("file://", ""), Imgproc.COLOR_BGR2RGB);
+    Log.i("imageUri", imageUri);
+    Mat src;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      String fileUri = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+          + imageUri.replace("file://", "");
+      Log.d(TAG, "fileUri " + fileUri);
+      src = Imgcodecs.imread(fileUri, Imgproc.COLOR_BGR2RGB);
+      Log.d(TAG, "src " + src);
+    } else {
+      src = Imgcodecs.imread(imageUri.replace("file://", ""), Imgproc.COLOR_BGR2RGB);
+    }
     Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2RGB);
 
     boolean ratioAlreadyApplied = tr.x * (src.size().width / 500) < src.size().width;
