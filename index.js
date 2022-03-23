@@ -85,17 +85,22 @@ class CustomCrop extends Component {
     }
 
     createPanResponser(corner) {
+        const MAX_Y_VALUE_LIMIT = Dimensions.get('window').height - 25 * Dimensions.get('window').scale;
+        const MIN_Y_VALUE_LIMIT = 30 * Dimensions.get('window').scale;
+
         return PanResponder.create({
             onStartShouldSetPanResponder: () => true,
             onPanResponderMove: (evt, gestureState) => {
-                Animated.event([
-                    null,
-                    {
-                        dx: corner.x,
-                        dy: corner.y,
-                    },
-                ])(evt, gestureState);
-                this.updateOverlayString();
+                 if ( (gestureState.moveY > MIN_Y_VALUE_LIMIT && gestureState.moveY < MAX_Y_VALUE_LIMIT ) ) {
+                    Animated.event([
+                        null,
+                        {
+                            dx: corner.x,
+                            dy: corner.y,
+                        },
+                    ])(evt, gestureState);
+                    this.updateOverlayString();
+                } 
             },
             onPanResponderRelease: () => {
                 corner.flattenOffset();
